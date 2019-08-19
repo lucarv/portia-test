@@ -10,7 +10,7 @@ This sample includes an alarm function that will push a web socket message to a 
 3. Provision a device in IoT Hub. Set an environment variable called DeviceCS set to the connetion string of the device
 4. Set an environment variable called WSPORT set to a port where web socket communitacion will occur
 5. Clone this repo 
-6. Start the alarm_server script on your computer
+6. Start the alarm_server script on Azure. You can do that on a VM (remember to open the port used for the web socket communication) or using Azure Container Instance and running the script on a container. 
 7. Start the alarm_client script on the same computer or an computer that have the clock synchronized with the alarm server clock
 8. Start the device simulator script (device.js)
 
