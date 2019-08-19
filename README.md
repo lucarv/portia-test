@@ -20,6 +20,7 @@ This sample includes an alarm function that will push a web socket message to a 
 
 The alarm server subscribes to the default endpoint in IoT Hub and will receive all telemetry.  
 The device simulator will send telemetry in 5 seconds interval, reporting an increase in temperature. When the temperature reaches a threshold, the alarm server will send a web socket message to the alarm client. This message contains a timestamp that was created when the message was generated on the device simulator.  
-WHen the alarm client receives the alarm, it will display the elapse dme from message generated to message received, in miliseconds.
+WHen the alarm client receives the alarm, it will display the elapse dme from message generated to message received, in miliseconds.  
+The alarm client wait 10 seconds and clear the alarm, and things will repeat nicely in a loop until the scripts exit,
 
 
