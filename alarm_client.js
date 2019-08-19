@@ -21,6 +21,8 @@ connection.onmessage = (e) => {
   console.log('now: ' + Date.now())
   console.log('enqueued: ' + msg.ts)
   console.log('elapsed: ' + elapsed)
+  console.log('-------------------------------')
+
 
   connection.send('rcv') 
   setTimeout(ackAlarm, 10000, 'funky');
