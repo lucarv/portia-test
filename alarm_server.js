@@ -2,11 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 'use strict';
+
 require('dotenv').config()
 const WebSocket = require('ws')
 const wss = new WebSocket.Server({
   port: process.env.WSPORT
 })
+console.log('listening to ws messages on port: ' + wss.options.port)
 var wsc, alarmFlag = false;
 
 wss.on('connection', ws => {
