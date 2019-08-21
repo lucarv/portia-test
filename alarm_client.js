@@ -4,6 +4,7 @@ const WebSocket = require('ws')
 const connection = new WebSocket(process.env.WSSURL)
 
 const ackAlarm = () => {
+  console.log('agent has cleared alarm')
     connection.send(JSON.stringify({"msg": "alarm cleared"})) 
 }
 connection.onopen = () => {

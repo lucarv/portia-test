@@ -9,19 +9,25 @@ const wss = new WebSocket.Server({
   port: process.env.WSPORT
 })
 console.log('listening to ws messages on port: ' + wss.options.port)
-var wsc, alarmFlag = false;
+var wsc = [], alarmFlag = false;
 
-wss.on('connection', ws => {
-  console.log('web socket client connected')
+wss.on('connection', (ws, req) => {
+  const ip = req.connection.remoteAddress;
+  console.log(`web socket ${ip} connected`)
+
+  wsc.push(ws);
+  console.log(`now with ${wsc.length} operators connected`)
+  wsc[wsc.length - 1].send(JSON.stringify({
+    "msg": "connected to server"
+  }))
 
   ws.on('message', message => {
     console.log(`Received message => ${message}`)
     let msg = JSON.parse(message);
-    if (msg.msg == 'ack')
+    if (msg.msg == 'alarm cleared')
       alarmFlag = false
   })
-  wsc = ws;
-  wsc.send(JSON.stringify({"msg": "connected to server"}))
+
 })
 
 var connectionString = process.env.ServiceCS;
@@ -36,22 +42,24 @@ var printError = function (err) {
 
 var dispatch = function (message) {
   let msg_id = message.properties.message_id
-  let enq_time = message.annotations['iothub-enqueuedtime']
-  let deviceId = message.annotations['iothub-connection-device-id']
-  if (deviceId == 'simulated4fo') {
+  //let deviceId = message.annotations['iothub-connection-device-id']
+  //if (deviceId == 'simulated4fo') {
     console.log(message.body)
     if (message.body.temperature > 30 && !alarmFlag) {
-      console.log('send alarm to operator')
+      console.log(`send alarm to ${wsc.length} operators`)
       alarmFlag = true
       let alarm = JSON.stringify({
         "msgid:": msg_id,
         "ts": message.body.timestamp
-      })
-      console.log(alarm)
-      wsc.send(alarm)
+      });
+      wss.clients.forEach(function each(client) {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(alarm);
+        }
+      });
     }
-  }
-};
+  //};
+}
 
 // Connect to the partitions on the IoT Hub's Event Hubs-compatible endpoint.
 // This example only reads messages sent after this application started.
