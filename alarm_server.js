@@ -44,13 +44,14 @@ var dispatch = function (message) {
   let msg_id = message.properties.message_id
   //let deviceId = message.annotations['iothub-connection-device-id']
   //if (deviceId == 'simulated4fo') {
-    console.log(message.body)
     if (message.body.temperature > 30 && !alarmFlag) {
       console.log(`send alarm to ${wsc.length} operators`)
       alarmFlag = true
+      let elapsed = Date.now() - message.body.timestamp
+      console.log('Processing Time in Azure: ' + elapsed)
       let alarm = JSON.stringify({
-        "msgid:": msg_id,
-        "elapsed": Date.now() - message.body.timestamp
+        "msgid": msg_id,
+        "elapsed": elapsed
       });
       wss.clients.forEach(function each(client) {
         if (client.readyState === WebSocket.OPEN) {

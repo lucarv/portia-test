@@ -18,9 +18,8 @@ connection.onerror = (error) => {
 
 connection.onmessage = (e) => {
   msg = JSON.parse(e.data)
-  if (msg.hasOwnProperty('ts')){
-    let elapsed = Date.now() - msg.ts
-    console.log('time elapsed: ' + msg.ts)
+  if (msg.hasOwnProperty('elapsed')){
+    console.log('time elapsed: ' + msg.elapsed)
     console.log('-------------------------------')
     connection.send(JSON.stringify({"msg": "alarm received"})) 
     setTimeout(ackAlarm, 10000, 'funky');
