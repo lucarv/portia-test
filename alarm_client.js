@@ -20,9 +20,7 @@ connection.onmessage = (e) => {
   msg = JSON.parse(e.data)
   if (msg.hasOwnProperty('ts')){
     let elapsed = Date.now() - msg.ts
-    console.log('now: ' + Date.now())
-    console.log('enqueued: ' + msg.ts)
-    console.log('elapsed: ' + elapsed)
+    console.log('time elapsed: ' + msg.ts)
     console.log('-------------------------------')
     connection.send(JSON.stringify({"msg": "alarm received"})) 
     setTimeout(ackAlarm, 10000, 'funky');

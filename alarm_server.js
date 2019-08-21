@@ -50,7 +50,7 @@ var dispatch = function (message) {
       alarmFlag = true
       let alarm = JSON.stringify({
         "msgid:": msg_id,
-        "ts": message.body.timestamp
+        "elapsed": Date.now() - message.body.timestamp
       });
       wss.clients.forEach(function each(client) {
         if (client.readyState === WebSocket.OPEN) {
