@@ -16,10 +16,12 @@ wss.on('connection', ws => {
 
   ws.on('message', message => {
     console.log(`Received message => ${message}`)
-    if (message == 'ack')
+    let msg = JSON.parse(message);
+    if (msg.msg == 'ack')
       alarmFlag = false
   })
   wsc = ws;
+  wsc.send(JSON.stringify({"msg": "connected to server"}))
 })
 
 var connectionString = process.env.ServiceCS;
