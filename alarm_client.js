@@ -1,27 +1,30 @@
 require('dotenv').config()
 
 const WebSocket = require('ws')
-const connection = new WebSocket(process.env.WSSURL)
+const client = new WebSocket(process.env.WSSURL)
 
 const ackAlarm = () => {
   console.log('agent has cleared alarm')
-  connection.send(JSON.stringify({
+  client.send(JSON.stringify({
     "msg": "alarm cleared"
   }))
 }
-connection.onopen = () => {
-  connection.send(JSON.stringify({
+
+client.onopen = () => {
+  // do nothing for now
+  /*
+  client.send(JSON.stringify({
     "msg": "agent connected"
   }))
+  */
 }
 
-connection.onerror = (error) => {
+client.onerror = (error) => {
   console.log('WebSocket error')
   console.log(error)
 }
 
-connection.onmessage = (e) => {
-  console.log(e.data)
+client.onmessage = (e) => {
   msg = JSON.parse(e.data)
   if (msg.hasOwnProperty('deviceId')) {
     let totalLatency = Date.now() - msg.generated;
@@ -30,12 +33,13 @@ connection.onmessage = (e) => {
 
 
     console.log('-------------------------------')
-    connection.send(JSON.stringify({
+    client.send(JSON.stringify({
       "msg": "alarm received"
     }))
     setTimeout(ackAlarm, 600000, 'funky');
+
+    
   } else
     console.log('mgmt message: ' + msg.msg)
-
 
 }

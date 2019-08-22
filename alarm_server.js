@@ -14,10 +14,12 @@ var wsc = [],
 
 wss.on('connection', (ws, req) => {
   // lines below will not work behind NAT
+  /*
   const ip = req.connection.remoteAddress;
   console.log(`web socket ${ip} connected`)
+  */
   wsc.push(ws);
-  console.log(`now with ${wsc.length} operators connected`)
+  console.log(`client connected\n # ${wsc.length} clients connected`)
   wsc[wsc.length - 1].send(JSON.stringify({
     "msg": "connected to server"
   }))
@@ -29,6 +31,17 @@ wss.on('connection', (ws, req) => {
       console.log('agent has cleared alarm')
       alarmFlag = false
     }
+  })
+
+  ws.on('close', (code) => {
+    let index = wsc.indexOf(ws)
+    wsc.splice(index, 1)
+
+    if (wsc.length == 0) {
+      console.log('no more clients connected')
+      alarmFlag = false
+    } else
+      console.log(`client terminated with error code ${code}\n #${wsc.length} clients connected`)
   })
 })
 
@@ -42,12 +55,11 @@ var printError = function (err) {
   console.log(err.message);
 };
 
-var dispatch = function (message) { 
+var dispatch = function (message) {
   let deviceId = message.annotations['iothub-connection-device-id']
-  var enqueued = 
   console.log('----------------------------------------------------------')
   console.log(`received telemetry from ${deviceId}: temperature: ${message.body.temperature}`)
-  if (message.body.temperature > 30 && !alarmFlag) {
+  if (message.body.temperature > 30 && !alarmFlag && wsc.length > 0) {
     let processing = Date.now() - message.annotations['iothub-enqueuedtime'];
     console.log(' # processing time: ' + processing)
     console.log(`send alarm to ${wsc.length} operators`)
