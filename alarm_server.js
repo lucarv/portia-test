@@ -9,12 +9,13 @@ const wss = new WebSocket.Server({
   port: process.env.WSPORT
 })
 console.log('listening to ws messages on port: ' + wss.options.port)
-var wsc = [], alarmFlag = false;
+var wsc = [],
+  alarmFlag = false;
 
 wss.on('connection', (ws, req) => {
+  // lines below will not work behind NAT
   const ip = req.connection.remoteAddress;
   console.log(`web socket ${ip} connected`)
-
   wsc.push(ws);
   console.log(`now with ${wsc.length} operators connected`)
   wsc[wsc.length - 1].send(JSON.stringify({
@@ -24,10 +25,11 @@ wss.on('connection', (ws, req) => {
   ws.on('message', message => {
     console.log(`Received message => ${message}`)
     let msg = JSON.parse(message);
-    if (msg.msg == 'alarm cleared')
+    if (msg.msg == "alarm cleared" && alarmFlag == true) {
+      console.log('agent has cleared alarm')
       alarmFlag = false
+    }
   })
-
 })
 
 var connectionString = process.env.ServiceCS;
@@ -40,26 +42,27 @@ var printError = function (err) {
   console.log(err.message);
 };
 
-var dispatch = function (message) {
-  let msg_id = message.properties.message_id
-  //let deviceId = message.annotations['iothub-connection-device-id']
-  //if (deviceId == 'simulated4fo') {
-    if (message.body.temperature > 30 && !alarmFlag) {
-      console.log(`send alarm to ${wsc.length} operators`)
-      alarmFlag = true
-      let elapsed = Date.now() - message.body.timestamp
-      console.log('Processing Time in Azure: ' + elapsed)
-      let alarm = JSON.stringify({
-        "msgid": msg_id,
-        "elapsed": elapsed
-      });
-      wss.clients.forEach(function each(client) {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(alarm);
-        }
-      });
-    }
-  //};
+var dispatch = function (message) { 
+  let deviceId = message.annotations['iothub-connection-device-id']
+  var enqueued = 
+  console.log('----------------------------------------------------------')
+  console.log(`received telemetry from ${deviceId}: temperature: ${message.body.temperature}`)
+  if (message.body.temperature > 30 && !alarmFlag) {
+    let processing = Date.now() - message.annotations['iothub-enqueuedtime'];
+    console.log(' # processing time: ' + processing)
+    console.log(`send alarm to ${wsc.length} operators`)
+    alarmFlag = true
+    let alarm = JSON.stringify({
+      "deviceId": deviceId,
+      "generated": message.body.timestamp,
+      "processing": processing
+    });
+    wss.clients.forEach(function each(client) {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(alarm);
+      }
+    });
+  }
 }
 
 // Connect to the partitions on the IoT Hub's Event Hubs-compatible endpoint.

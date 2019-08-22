@@ -25,7 +25,6 @@ var client = Client.fromConnectionString(connectionString, Protocol);
 var temperature = 25;
 var tele;
 
-
 const telemetry = () => {
   // any type of data can be sent into a message: bytes, JSON...but the SDK will not take care of the serialization of objects.
   //let payload = message_array[Math.floor(Math.random() * (200 - 1) + 1)]
@@ -34,6 +33,7 @@ const telemetry = () => {
     "timestamp": Date.now()
   }
 
+  console.log('Timestamp: ' + new Date(payload.timestamp))
   console.log('Current Sensor Temperature is: ' + payload.temperature)
   /**/
   let message = new Message(JSON.stringify(payload));
@@ -48,7 +48,7 @@ const telemetry = () => {
       console.error('Could not send: ' + err.toString());
       process.exit(-1);
     } else {
-      temperature += 0.5
+      temperature += 1.0
     }
   });
 };
