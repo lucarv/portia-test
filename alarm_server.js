@@ -74,7 +74,6 @@ var dispatch = function (message) {
     alarmFlag = true
     let alarm = JSON.stringify({
       "deviceId": deviceId,
-      "generated": message.body.timestamp,
       "processing": processing
     });
     wss.clients.forEach(function each(client) {
