@@ -8,7 +8,7 @@ const WebSocket = require('ws')
 const wss = new WebSocket.Server({
   port: process.env.WSPORT
 })
-console.log('listening to ws messages on port: ' + wss.options.port)
+console.log('Alarm Server listening to ws messages on port: ' + wss.options.port)
 var wsc = [],
   alarmFlag = false;
 
@@ -56,11 +56,19 @@ var printError = function (err) {
 };
 
 var dispatch = function (message) {
+  let displayName = (message.body.DisplayName)
+  let value = message.body.Value.Value
   let deviceId = message.annotations['iothub-connection-device-id']
   console.log('----------------------------------------------------------')
-  console.log(`received telemetry from ${deviceId}: temperature: ${message.body.temperature}`)
-  if (message.body.temperature > 30 && !alarmFlag && wsc.length > 0) {
-    let processing = Date.now() - message.annotations['iothub-enqueuedtime'];
+  console.log(`received telemetry from ${deviceId}\nTag: [${displayName}] Value => ${value}`)
+  if (displayName == 'Pressure Alarm On' && value && !alarmFlag && wsc.length > 0) {
+    console.log('HUB TIME')
+    console.log(new Date(message.annotations['iothub-enqueuedtime']))
+    let now = Date.now()
+    console.log('NOW TIME')
+    console.log(new Date(now))
+
+    let processing = now - message.annotations['iothub-enqueuedtime'];
     console.log(' # processing time: ' + processing)
     console.log(`send alarm to ${wsc.length} operators`)
     alarmFlag = true
